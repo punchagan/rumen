@@ -1,0 +1,54 @@
+:root {
+    color-scheme: light dark;
+}
+body {
+    font-family: system-ui, sans-serif;
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+label {
+    font-weight: 500;
+}
+input,
+textarea {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+button {
+    padding: 0.75rem;
+    font-size: 1rem;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+button:hover {
+    background: #1d4ed8;
+}
+.status {
+    font-size: 0.875rem;
+    color: #666;
+}
+.status.error {
+    color: #dc2626;
+}
+.status.success {
+    color: #16a34a;
+}
+.hidden {
+    display: none;
+}

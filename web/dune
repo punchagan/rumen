@@ -1,0 +1,17 @@
+; Copy compiled service worker from build
+
+(rule
+ (alias web)
+ (mode promote)
+ (deps %{project_root}/src/sw.bc.js)
+ (target sw.js)
+ (action
+  (copy %{deps} %{target})))
+
+(rule
+ (alias web)
+ (mode promote)
+ (deps %{project_root}/src/app.bc.js)
+ (target app.js)
+ (action
+  (copy %{deps} %{target})))

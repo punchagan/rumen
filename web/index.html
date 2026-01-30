@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>rumen</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="/app.css" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <style></style>
+  </head>
+  <body>
+    <h1>rumen</h1>
+    <form id="setup-form" class="hidden">
+      <div>
+        <label for="github-token">GitHub Token</label>
+        <input type="password" id="github-token" name="github-token" required />
+        <small
+          >Needs <code>content:read&write</code> scope on 1 repository.
+          <a
+            href="https://github.com/settings/personal-access-tokens/new?name=Rumen%20data"
+            target="_blank"
+            >Create token</a
+          ></small
+        >
+      </div>
+      <div>
+        <label for="github-repo">Repository</label>
+        <input
+          type="text"
+          id="github-repo"
+          name="github-repo"
+          placeholder="username/rumen-data"
+          required
+        />
+      </div>
+      <button type="submit">Save Config</button>
+    </form>
+    <form id="entry-form" class="hidden">
+      <div>
+        <label for="url">URL</label>
+        <input type="url" id="url" name="url" required />
+      </div>
+      <div>
+        <label for="title">Title</label>
+        <input type="text" id="title" name="title" />
+      </div>
+      <div>
+        <label for="tags">Tags (comma-separated)</label>
+        <input
+          type="text"
+          id="tags"
+          name="tags"
+          placeholder="tech, read-later"
+        />
+      </div>
+      <div>
+        <label for="description">Notes</label>
+        <textarea id="description" name="description"></textarea>
+      </div>
+      <button type="submit">Save</button>
+    </form>
+    <p id="status" class="status"></p>
+    <script>
+      // Register service worker
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("/sw.js")
+          .then((reg) => console.log("SW registered"))
+          .catch((err) => console.error("SW registration failed:", err));
+      }
+    </script>
+    <script src="/app.js"></script>
+  </body>
+</html>

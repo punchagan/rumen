@@ -1,0 +1,9 @@
+(executable
+ (name sw)
+ (modes js)
+ (libraries brr))
+
+(executable
+ (name app)
+ (modes js)
+ (libraries brr))
