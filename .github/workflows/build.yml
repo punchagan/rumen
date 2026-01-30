@@ -1,0 +1,40 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Cache Build Dir
+        id: cache-build-dir
+        uses: actions/cache@v4
+        with:
+          path: _build
+          key: build-dir-${{ runner.os }}-${{ hashFiles('dune-project') }}
+
+      - name: Setup dune
+        uses: ocaml-dune/setup-dune@v2
+        with:
+          steps: "install-dune install-depexts build"
+
+      - name: Upload web/ to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+
+      - name: Deploy
+        if: github.ref == 'refs/heads/main'
+        uses: actions/deploy-pages@v4
