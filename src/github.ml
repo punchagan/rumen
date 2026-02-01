@@ -1,6 +1,7 @@
 open Brr
 module Fetch = Brr_io.Fetch
 module Storage = Brr_io.Storage
+module W = Workflow
 
 type config = {token: string; repo: string}
 
@@ -109,4 +110,14 @@ let save_entry_to_github entry =
       let content = Entry.to_jv entry |> encode in
       let path = Entry.filename entry in
       let commit_message = entry.title in
+      create_or_update_file ~commit_message ~config ~path content
+
+let update_workflow_file () =
+  match get_github_config () with
+  | None ->
+      "GitHub configuration not found" |> Jstr.v |> Jv.Error.v |> Fut.error
+  | Some config ->
+      let content = W.workflow_yml |> Jstr.v in
+      let path = ".github/workflows/generate.yml" in
+      let commit_message = "Update generate workflow file" in
       create_or_update_file ~commit_message ~config ~path content

@@ -1,4 +1,5 @@
 open Brr
+open Brr_io
 module GH = Github
 
 module LocalStorage = struct
@@ -63,7 +64,7 @@ let clear_param key =
       |> Uri.Params.of_assoc
     in
     let new_uri = Uri.with_query_params uri params in
-    Window.set_location G.window new_uri
+    Window.History.replace_state ?uri:(Some new_uri) (Window.history G.window)
 
 let show_config () = get_param "config" = "1"
 
@@ -91,7 +92,6 @@ let save_entry entry =
   in
   if Navigator.online G.navigator then
     Fut.await (GH.save_entry_to_github entry) (fun res ->
-        let open Brr_io in
         match res with
         | Ok response ->
             if Fetch.Response.ok response then (
@@ -137,7 +137,6 @@ let handle_config_submit ev =
   match LocalStorage.save_config config with
   | Ok () ->
       set_status "Configuration saved!" "success" ;
-      clear_param "config" ;
       show_element "entry-form" ;
       hide_element "setup-form"
   | Error e ->
@@ -145,6 +144,28 @@ let handle_config_submit ev =
         (Printf.sprintf "Failed to save configuration: %s"
            (e |> Jv.Error.message |> Jstr.to_string) )
         "error"
+
+let handle_save_config_and_update_workflow ev =
+  Ev.prevent_default ev ;
+  Ev.stop_propagation ev ;
+  handle_config_submit ev ;
+  Console.log [Jv.of_string "Updating GitHub workflow..."] ;
+  Fut.await (GH.update_workflow_file ()) (fun res ->
+      clear_param "config" ;
+      match res with
+      | Ok response ->
+          if Fetch.Response.ok response then
+            set_status "GitHub workflow updated!" "success"
+          else
+            set_status
+              (Printf.sprintf "GitHub API error: %d"
+                 (Fetch.Response.status response) )
+              "error"
+      | Error e ->
+          set_status
+            (Printf.sprintf "Failed to update workflow: %s"
+               (e |> Jv.Error.message |> Jstr.to_string) )
+            "error" )
 
 let handle_entry_submit ev =
   Ev.prevent_default ev ;
@@ -176,5 +197,8 @@ let () =
   let _ = Ev.listen submit_ev handle_entry_submit (El.as_target form) in
   (* Attach setup-form handler *)
   let setup_form = get_element "setup-form" in
-  let _ = Ev.listen submit_ev handle_config_submit (El.as_target setup_form) in
+  let _ =
+    Ev.listen submit_ev handle_save_config_and_update_workflow
+      (El.as_target setup_form)
+  in
   Console.log [Jstr.v "rumen app initialized"]

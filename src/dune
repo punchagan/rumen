@@ -7,3 +7,11 @@
  (name app)
  (modes js)
  (libraries brr))
+
+(rule
+ (with-stdout-to
+  workflow.ml
+  (progn
+   (echo "let workflow_yml = {yml|")
+   (cat workflow.yml)
+   (echo "|yml}\n"))))
