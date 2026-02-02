@@ -1,0 +1,3 @@
+(executable
+ (name generate)
+ (libraries rumen cmdliner unix yojson syndic))

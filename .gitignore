@@ -4,3 +4,4 @@ _opam/
 .merlin
 
 web/*.js
+/web/scripts/

@@ -16,4 +16,4 @@
  ;; TODO: (synopsis "")
  ;; TODO: (description "")
  (allow_empty)
- (depends ocaml brr))
+ (depends ocaml brr cmdliner ppx_deriving_yojson yojson syndic))

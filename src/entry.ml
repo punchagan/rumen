@@ -4,3 +4,4 @@ type t =
   ; tags: string list
   ; description: string
   ; added: float }
+[@@deriving yojson]

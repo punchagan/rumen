@@ -15,3 +15,13 @@
  (target app.js)
  (action
   (copy %{deps} %{target})))
+
+(subdir
+ scripts
+ (rule
+  (alias web)
+  (mode promote)
+  (deps %{project_root}/scripts/generate.exe)
+  (target generate.exe)
+  (action
+   (copy %{deps} %{target}))))

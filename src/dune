@@ -21,4 +21,6 @@
 (library
  (modules entry)
  (name rumen)
- (libraries brr))
+ (libraries brr)
+ (preprocess
+  (pps ppx_deriving_yojson)))
