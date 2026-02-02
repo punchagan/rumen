@@ -1,13 +1,3 @@
-(executable
- (name sw)
- (modes js)
- (libraries brr))
-
-(executable
- (name app)
- (modes js)
- (libraries brr))
-
 (rule
  (with-stdout-to
   workflow.ml
@@ -15,3 +5,20 @@
    (echo "let workflow_yml = {yml|")
    (cat workflow.yml)
    (echo "|yml}\n"))))
+
+(executable
+ (name sw)
+ (modes js)
+ (modules sw)
+ (libraries brr))
+
+(executable
+ (name app)
+ (modes js)
+ (modules app workflow github entry_web)
+ (libraries brr rumen))
+
+(library
+ (modules entry)
+ (name rumen)
+ (libraries brr))

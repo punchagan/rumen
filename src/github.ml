@@ -107,8 +107,8 @@ let save_entry_to_github entry =
       let encode v =
         Jv.to_jstr (Jv.call json "stringify" [|v; Jv.undefined; Jv.of_int 2|])
       in
-      let content = Entry.to_jv entry |> encode in
-      let path = Entry.filename entry in
+      let content = Entry_web.to_jv entry |> encode in
+      let path = Entry_web.filename entry in
       let commit_message = entry.title in
       create_or_update_file ~commit_message ~config ~path content
 

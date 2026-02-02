@@ -1,6 +1,8 @@
 open Brr
 open Brr_io
 module GH = Github
+module Entry = Rumen.Entry
+module Entry_w = Entry_web
 
 module LocalStorage = struct
   module Storage = Brr_io.Storage
@@ -20,7 +22,7 @@ module LocalStorage = struct
 
   let add_entry (entry : Entry.t) =
     let key = Jstr.v ("entry:" ^ entry.url) in
-    let value = Entry.to_jv entry |> Json.encode in
+    let value = Entry_w.to_jv entry |> Json.encode in
     Storage.set_item storage key value
 
   let remove_entry (entry : Entry.t) =
