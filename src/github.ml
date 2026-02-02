@@ -119,5 +119,5 @@ let update_workflow_file () =
   | Some config ->
       let content = W.workflow_yml |> Jstr.v in
       let path = ".github/workflows/generate.yml" in
-      let commit_message = "Update generate workflow file" in
+      let commit_message = "generate workflow file" in
       create_or_update_file ~commit_message ~config ~path content
