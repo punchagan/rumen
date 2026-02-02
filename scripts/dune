@@ -1,3 +1,4 @@
 (executable
- (name generate)
+ (name rumen_cli)
+ (public_name rumen-cli)
  (libraries rumen cmdliner unix yojson syndic))

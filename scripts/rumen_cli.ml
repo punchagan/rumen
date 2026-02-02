@@ -89,7 +89,7 @@ let default_cmd =
   let doc = "Rumen article fetcher and feed generator" in
   let term = Term.(ret (const (fun _ -> `Help (`Pager, None)) $ const ())) in
   let info =
-    Cmd.info "rumen" ~doc ~sdocs:"COMMON OPTIONS" ~exits:Cmd.Exit.defaults
+    Cmd.info "rumen-cli" ~doc ~sdocs:"COMMON OPTIONS" ~exits:Cmd.Exit.defaults
   in
   Cmd.group ~default:term info [generate_feed_cmd; fetch_articles_cmd]
 

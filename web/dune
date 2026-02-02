@@ -21,7 +21,7 @@
  (rule
   (alias web)
   (mode promote)
-  (deps %{project_root}/scripts/generate.exe)
-  (target generate.exe)
+  (deps %{project_root}/scripts/rumen_cli.exe)
+  (target rumen-cli.exe)
   (action
    (copy %{deps} %{target}))))
