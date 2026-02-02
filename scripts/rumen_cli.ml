@@ -5,6 +5,7 @@ open Syndic
 let generate_feed_from_entries entries =
   Printf.sprintf "Generating feed from %d entries ...\n" (List.length entries)
   |> print_endline ;
+  (* FIXME: Use a proper ID and an appropriate link *)
   let id = Uri.of_string "https://example.com/atom.xml" in
   let links = [Atom.link ~rel:Self id] in
   let title : Atom.text_construct = Text "My Rumen Feed" in

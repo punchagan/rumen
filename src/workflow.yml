@@ -1,12 +1,14 @@
 ---
-name: Generate Feed
+name: Fetch Articles and Generate Feed
 
 on:
   push:
+    # FIXME: Do we need to run generate on every push?
+    # Maybe only fetch articles on push, and generate on a Cron?
     paths:
       - "articles/**"
   schedule:
-    # Run daily at midnight UTC
+    # FIXME: Is the schedule good enough?
     - cron: "0 0 * * *"
   workflow_dispatch:
 
@@ -17,8 +19,12 @@ concurrency:
 jobs:
   generate:
     runs-on: ubuntu-latest
+
     permissions:
-      contents: write
+      contents: read
+      pages: write
+      id-token: write
+
     steps:
       - uses: actions/checkout@v6
 
@@ -26,3 +32,27 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+
+      - name: Install Readability CLI
+        run: |
+          npm install -g readability-cli
+
+      - name: Download latest rumen-cli binary
+        run: |
+          wget -c https://punchagan.github.io/rumen/scripts/rumen-cli.exe
+          chmod a+x rumen-cli.exe
+
+      - name: Generate Feed
+        run: |
+          ./rumen-cli.exe generate
+          mkdir web/
+          mv atom.xml web/
+
+      - name: Upload web/ to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+
+      - name: Deploy
+        if: github.ref == 'refs/heads/main'
+        uses: actions/deploy-pages@v4
