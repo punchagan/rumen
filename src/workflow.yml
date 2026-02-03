@@ -44,7 +44,7 @@ jobs:
 
       - name: Generate Feed
         run: |
-          ./rumen-cli.exe generate
+          ./rumen-cli.exe generate --id "feed:$GITHUB_REPOSITORY"
           mkdir web/
           mv atom.xml web/
 
