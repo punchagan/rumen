@@ -13,7 +13,11 @@
 
 (package
  (name rumen)
- ;; TODO: (synopsis "")
- ;; TODO: (description "")
+ (synopsis
+  "A PWA to save URLs to a GitHub repo and generate full-content RSS feeds")
+ (description
+  "A PWA with a share target that saves URLs to a GitHub repo, with a GitHub action to generate RSS feeds with full article content.")
  (allow_empty)
- (depends ocaml brr cmdliner ppx_deriving_yojson yojson syndic))
+ (depends ocaml brr cmdliner ppx_deriving_yojson yojson syndic)
+ (tags
+  ("rss" "feeds" "PWA" "offline" "read-later")))
