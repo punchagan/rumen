@@ -2,7 +2,7 @@ module Entry = Rumen.Entry
 open Cmdliner
 open Syndic
 
-let generate_feed_from_entries ~feed_id entries =
+let generate_feed_from_entries ~feed_id ~content_dir entries =
   Printf.sprintf "Generating feed from %d entries ...\n" (List.length entries)
   |> print_endline ;
   let updated = Ptime.of_float_s (Unix.gettimeofday ()) |> Option.get in
@@ -12,14 +12,33 @@ let generate_feed_from_entries ~feed_id entries =
         let entry_id = Uri.of_string entry.url in
         let entry_title : Atom.text_construct = Text entry.title in
         let summary : Atom.text_construct = Text entry.description in
+        let content =
+          match entry.content with
+          | Some hash ->
+              (* Open the file content_dir/hash and return content  *)
+              let filepath = Filename.concat content_dir hash in
+              let content =
+                if Sys.file_exists filepath then (
+                  let ic = open_in filepath in
+                  let len = in_channel_length ic in
+                  let content = really_input_string ic len in
+                  close_in ic ; content )
+                else
+                  "Article content is not available. (Content file not found)"
+              in
+              content
+          | None ->
+              "Article content is not available. (Content hash not set)"
+        in
+        let content : Atom.content = Html (Some entry_id, content) in
         let entry_updated =
           Ptime.of_float_s (entry.added /. 1000.)
           |> Option.value ~default:updated
         in
         let links = [Atom.link entry_id] in
         let authors = (Atom.author "Rumen feed generator", []) in
-        Atom.entry ~summary ~authors ~links ~id:entry_id ~title:entry_title
-          ~updated:entry_updated () )
+        Atom.entry ~summary ~content ~authors ~links ~id:entry_id
+          ~title:entry_title ~updated:entry_updated () )
       entries
   in
   let id = Uri.of_string feed_id in
@@ -37,6 +56,7 @@ let generate_feed ~feed_id ~n dir () =
     Printf.sprintf "%04d-%02d-%02d" (tm.tm_year + 1900) (tm.tm_mon + 1)
       tm.tm_mday
   in
+  let content_dir = Filename.concat dir "content" in
   let entries =
     Sys.readdir dir |> Array.to_list
     |> List.filter (fun filename ->
@@ -54,12 +74,13 @@ let generate_feed ~feed_id ~n dir () =
             None )
     |> List.sort (fun a b -> Float.compare b.Entry.added a.Entry.added)
   in
-  generate_feed_from_entries ~feed_id entries
+  generate_feed_from_entries ~feed_id ~content_dir entries
 
 (* fetch :: look for articles in the last n days which don't have content_hash
    value set and fetch content for them using the readability-cli. *)
 let fetch_articles _dir _days =
-  (* TODO *)
+  (* TODO: Fetch the content for articles by spwaning sub-processes running
+     readable CLI commands *)
   ()
 
 let articles_dir =

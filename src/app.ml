@@ -123,6 +123,7 @@ let entry_of_form () =
   ; title= get_input_value "title"
   ; tags
   ; description= get_input_value "description"
+  ; content= None
   ; added }
 
 let clear_form () =
