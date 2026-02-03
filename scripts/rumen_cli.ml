@@ -2,13 +2,9 @@ module Entry = Rumen.Entry
 open Cmdliner
 open Syndic
 
-let generate_feed_from_entries entries =
+let generate_feed_from_entries ~feed_id entries =
   Printf.sprintf "Generating feed from %d entries ...\n" (List.length entries)
   |> print_endline ;
-  (* FIXME: Use a proper ID and an appropriate link *)
-  let id = Uri.of_string "https://example.com/atom.xml" in
-  let links = [Atom.link ~rel:Self id] in
-  let title : Atom.text_construct = Text "My Rumen Feed" in
   let updated = Ptime.of_float_s (Unix.gettimeofday ()) |> Option.get in
   let feed_entries =
     List.map
@@ -26,11 +22,13 @@ let generate_feed_from_entries entries =
           ~updated:entry_updated () )
       entries
   in
-  let feed = Atom.feed ~links ~id ~title ~updated feed_entries in
+  let id = Uri.of_string feed_id in
+  let title : Atom.text_construct = Text "My Rumen Feed" in
+  let feed = Atom.feed ~id ~title ~updated feed_entries in
   let oc = open_out "atom.xml" in
   Atom.output feed (`Channel oc)
 
-let generate_feed dir n =
+let generate_feed ~feed_id ~n dir () =
   let cutoff_date =
     let now = Unix.time () in
     let n_days_ago = now -. float_of_int (n * 24 * 60 * 60) in
@@ -56,7 +54,7 @@ let generate_feed dir n =
             None )
     |> List.sort (fun a b -> Float.compare b.Entry.added a.Entry.added)
   in
-  generate_feed_from_entries entries
+  generate_feed_from_entries ~feed_id entries
 
 (* fetch :: look for articles in the last n days which don't have content_hash
    value set and fetch content for them using the readability-cli. *)
@@ -72,9 +70,17 @@ and days =
   let doc = "Number of days to generate articles for" in
   Arg.(value & opt int 42 & info ["n"; "days"] ~doc)
 
+and feed_id =
+  let doc = "Feed ID URI" in
+  Arg.(value & opt string "feed:example.com" & info ["id"] ~doc)
+
 let generate_feed_cmd =
   let doc = "Generate feed with articles" in
-  let term = Term.(const generate_feed $ articles_dir $ days) in
+  let term =
+    let open Cmdliner.Term.Syntax in
+    let+ articles_dir = articles_dir and+ days = days and+ feed_id = feed_id in
+    generate_feed ~feed_id ~n:days articles_dir ()
+  in
   let info =
     Cmd.info "generate" ~doc ~sdocs:"COMMON OPTIONS" ~exits:Cmd.Exit.defaults
   in
