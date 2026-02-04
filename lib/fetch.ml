@@ -67,34 +67,9 @@ let fetch_single_entry content_dir (filepath, entry) =
       Printf.printf "  -> %s : failed: %s\n%!" entry.url err
 
 let fetch_articles ~n ~max_concurrent dir =
-  let cutoff_date =
-    let now = Unix.time () in
-    let n_days_ago = now -. float_of_int (n * 24 * 60 * 60) in
-    Unix.gmtime n_days_ago
-    |> fun tm ->
-    Printf.sprintf "%04d-%02d-%02d" (tm.tm_year + 1900) (tm.tm_mon + 1)
-      tm.tm_mday
-  in
   let content_dir = Filename.concat dir "content" in
   if not (Sys.file_exists content_dir) then Unix.mkdir content_dir 0o755 ;
-  let entries_to_fetch =
-    Sys.readdir dir |> Array.to_list
-    |> List.filter (fun filename ->
-        String.length filename >= 15
-        && String.sub filename 0 10 >= cutoff_date
-        && Filename.extension filename = ".json" )
-    |> List.filter_map (fun filename ->
-        let filepath = Filename.concat dir filename in
-        let json = Yojson.Safe.from_file filepath in
-        match Entry.of_yojson json with
-        | Ok entry when Option.is_none entry.content ->
-            Some (filepath, entry)
-        | Ok _ ->
-            None
-        | Error err ->
-            Printf.printf "Failed to parse %s: %s\n" filepath err ;
-            None )
-  in
+  let entries_to_fetch = Entries.without_content ~n dir () in
   Printf.printf "Found %d entries to fetch content for\n%!"
     (List.length entries_to_fetch) ;
   parallel_iter ~max_concurrent
