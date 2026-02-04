@@ -8,7 +8,14 @@ let read_all_from_channel ic =
   with End_of_file -> Buffer.contents buf
 
 let fetch_content_for_url url =
-  let cmd = Printf.sprintf "readable '%s' -p html-content 2>/dev/null" url in
+  let user_agent =
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) \
+     Chrome/89.0.4389.90 Safari/537.36"
+  in
+  let cmd =
+    Printf.sprintf "readable -A '%s' -p html-content '%s' 2>/dev/null"
+      user_agent url
+  in
   let ic = Unix.open_process_in cmd in
   let content = read_all_from_channel ic in
   let status = Unix.close_process_in ic in
