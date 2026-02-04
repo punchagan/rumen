@@ -16,13 +16,17 @@
         <label for="github-token">GitHub Token</label>
         <input type="password" id="github-token" name="github-token" required />
         <small
-          >Needs <code>content:read&write</code> scope on 1 repository.
-          <a
-            href="https://github.com/settings/personal-access-tokens/new?name=Rumen%20data"
-            target="_blank"
-            >Create token</a
-          ></small
-        >
+          >Needs the following scopes on your data repository:
+            <ul>
+                <li><code>contents: read&write</code></li>
+                <li><code>workflows: read&write</code></li>
+                <li><code>actions: read&write</code></li>
+            </ul>
+            <a
+                href="https://github.com/settings/personal-access-tokens/new?name=Rumen%20data"
+                target="_blank"
+            >Create token</a> with access to only your data repository</small>
+
       </div>
       <div>
         <label for="github-repo">Repository</label>
