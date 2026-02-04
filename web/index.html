@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>rumen</title>
     <link rel="manifest" href="manifest.json" />
-    <link rel="stylesheet" href="/app.css" />
-    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="stylesheet" href="./app.css" />
+    <link rel="icon" href="./favicon.ico" sizes="any" />
     <style></style>
   </head>
   <body>
@@ -65,11 +65,11 @@
       // Register service worker
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker
-          .register("/sw.js")
+          .register("./sw.js")
           .then((reg) => console.log("SW registered"))
           .catch((err) => console.error("SW registration failed:", err));
       }
     </script>
-    <script src="/app.js"></script>
+    <script src="./app.js"></script>
   </body>
 </html>
