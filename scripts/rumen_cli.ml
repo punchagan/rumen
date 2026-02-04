@@ -1,13 +1,6 @@
 open Rumen
 open Cmdliner
 
-(* fetch :: look for articles in the last n days which don't have content_hash
-   value set and fetch content for them using the readability-cli. *)
-let fetch_articles _dir _days =
-  (* TODO: Fetch the content for articles by spwaning sub-processes running
-     readable CLI commands *)
-  ()
-
 let articles_dir =
   let doc = "Directory to save articles in" in
   Arg.(value & opt string "./articles" & info ["d"; "dir"] ~doc)
@@ -19,6 +12,10 @@ and days =
 and feed_id =
   let doc = "Feed ID URI" in
   Arg.(value & opt string "feed:example.com" & info ["id"] ~doc)
+
+and max_concurrent =
+  let doc = "Maximum number of concurrent fetches" in
+  Arg.(value & opt int 4 & info ["j"; "jobs"] ~doc)
 
 let generate_feed_cmd =
   let doc = "Generate feed with articles" in
@@ -33,9 +30,15 @@ let generate_feed_cmd =
   Cmd.v info term
 
 and fetch_articles_cmd =
-  let doc = "Fetch content for articles missing content_hash" in
+  let doc = "Fetch content for articles missing content" in
   let info = Cmd.info "fetch" ~doc in
-  let term = Term.(const fetch_articles $ articles_dir $ days) in
+  let term =
+    let open Cmdliner.Term.Syntax in
+    let+ dir = articles_dir
+    and+ days = days
+    and+ max_concurrent = max_concurrent in
+    Fetch.fetch_articles ~max_concurrent ~n:days dir
+  in
   Cmd.v info term
 
 let default_cmd =
