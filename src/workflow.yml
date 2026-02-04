@@ -86,5 +86,5 @@ jobs:
           git add articles/
           git config user.email "rumen.fetch@example.com"
           git config user.name "Rumen CLI Fetch"
-          git commit -m "Fetched contents for articles"
+          git commit -m "Fetched article content" || echo "No changes to commit"
           git push
