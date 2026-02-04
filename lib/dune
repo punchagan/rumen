@@ -1,0 +1,5 @@
+(library
+ (name rumen)
+ (libraries brr unix ptime yojson syndic)
+ (preprocess
+  (pps ppx_deriving_yojson)))

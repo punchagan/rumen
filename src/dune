@@ -17,10 +17,3 @@
  (modes js)
  (modules app workflow github entry_web)
  (libraries brr rumen))
-
-(library
- (modules entry)
- (name rumen)
- (libraries brr)
- (preprocess
-  (pps ppx_deriving_yojson)))
