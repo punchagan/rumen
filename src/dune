@@ -2,8 +2,9 @@
  (with-stdout-to
   workflow.ml
   (progn
+   ;; workflow.yml
    (echo "let workflow_yml = {yml|")
-   (cat workflow.yml)
+   (cat assets/workflow.yml)
    (echo "|yml}\n"))))
 
 (executable
