@@ -3,8 +3,6 @@ name: Fetch Articles and Generate Feed
 
 on:
   push:
-    # FIXME: Do we need to run generate on every push?
-    # Maybe only fetch articles on push, and generate on a Cron?
     paths:
       - "articles/**"
   schedule:
@@ -20,6 +18,9 @@ jobs:
   generate:
     runs-on: ubuntu-latest
 
+    # Don't run generate on push
+    if: ${{ github.event_name != 'push' }}
+
     permissions:
       contents: read
       pages: write
@@ -27,15 +28,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Install Readability CLI
-        run: |
-          npm install -g readability-cli
 
       - name: Download latest rumen-cli binary
         run: |
@@ -56,3 +48,43 @@ jobs:
       - name: Deploy
         if: github.ref == 'refs/heads/main'
         uses: actions/deploy-pages@v4
+
+  fetch:
+    runs-on: ubuntu-latest
+
+    # Fetch only runs if the triggering event was a 'push' to 'main'
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Readability CLI
+        run: |
+          npm install -g readability-cli
+
+      - name: Download latest rumen-cli binary
+        run: |
+          wget -c https://punchagan.github.io/rumen/scripts/rumen-cli.exe
+          chmod a+x rumen-cli.exe
+
+      - name: Fetch article contents
+        run: |
+          ./rumen-cli.exe fetch
+
+      - name: Commit any newly fetched contents
+        run: |
+          git add articles/
+          git config user.email "rumen.fetch@example.com"
+          git config user.name "Rumen CLI Fetch"
+          git commit -m "Fetched contents for articles"
+          git push
