@@ -55,9 +55,9 @@ let fetch_single_entry content_dir (filepath, entry) =
       Yojson.Safe.pretty_to_channel oc json ;
       output_char oc '\n' ;
       close_out oc ;
-      Printf.printf "  -> %s: saved as %s\n%!" entry.url hash
+      Printf.printf "  -> %s : saved as %s\n%!" entry.url hash
   | Error err ->
-      Printf.printf "  -> %s: failed: %s\n%!" entry.url err
+      Printf.printf "  -> %s : failed: %s\n%!" entry.url err
 
 let fetch_articles ~n ~max_concurrent dir =
   let cutoff_date =
