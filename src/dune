@@ -5,7 +5,11 @@
    ;; workflow.yml
    (echo "let workflow_yml = {yml|")
    (cat assets/workflow.yml)
-   (echo "|yml}\n"))))
+   (echo "|yml}\n")
+   ;; fetch.sh script
+   (echo "let fetch_sh = {sh|")
+   (cat assets/fetch.sh)
+   (echo "|sh}\n"))))
 
 (executable
  (name sw)

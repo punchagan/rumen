@@ -119,7 +119,21 @@ let update_workflow_file () =
   | None ->
       "GitHub configuration not found" |> Jstr.v |> Jv.Error.v |> Fut.error
   | Some config ->
+      (* Update the GHA workflow file *)
       let content = W.workflow_yml |> Jstr.v in
       let path = ".github/workflows/generate.yml" in
       let commit_message = "generate workflow file" in
-      create_or_update_file ~commit_message ~config ~path content
+      let res_yml =
+        create_or_update_file ~commit_message ~config ~path content
+      in
+      (* Update the bash script used by the workflow file *)
+      let content = W.fetch_sh |> Jstr.v in
+      let path = "fetch.sh" in
+      let commit_message = "fetch script" in
+      let res_sh =
+        create_or_update_file ~commit_message ~config ~path content
+      in
+      let open Fut.Result_syntax in
+      let* r1 = res_yml in
+      let* r2 = res_sh in
+      Fut.ok (r1, r2)

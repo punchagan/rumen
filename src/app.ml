@@ -156,14 +156,15 @@ let handle_save_config_and_update_workflow ev =
   Fut.await (GH.update_workflow_file ()) (fun res ->
       clear_param "config" ;
       match res with
-      | Ok response ->
-          if Fetch.Response.ok response then
-            set_status "GitHub workflow updated!" "success"
-          else
-            set_status
-              (Printf.sprintf "GitHub API error: %d"
-                 (Fetch.Response.status response) )
-              "error"
+      | Ok (r1, r2) when Fetch.Response.ok r1 && Fetch.Response.ok r2 ->
+          set_status "GitHub workflow updated!" "success"
+      | Ok (r1, r2) ->
+          let error_status =
+            max (Fetch.Response.status r1) (Fetch.Response.status r2)
+          in
+          set_status
+            (Printf.sprintf "GitHub API error: %d" error_status)
+            "error"
       | Error e ->
           set_status
             (Printf.sprintf "Failed to update workflow: %s"
