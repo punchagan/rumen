@@ -18,6 +18,13 @@
  (description
   "A PWA with a share target that saves URLs to a GitHub repo, with a GitHub action to generate RSS feeds with full article content.")
  (allow_empty)
- (depends ocaml brr cmdliner ppx_deriving_yojson yojson syndic)
+ (depends
+  ocaml
+  brr
+  cmdliner
+  ppx_deriving_yojson
+  yojson
+  syndic
+  (alcotest :with-test))
  (tags
   ("rss" "feeds" "PWA" "offline" "read-later")))

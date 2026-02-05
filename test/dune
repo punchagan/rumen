@@ -1,0 +1,5 @@
+(test
+ (name test_rumen_lib)
+ (libraries rumen alcotest str)
+ (deps
+  (glob_files data/*.html)))

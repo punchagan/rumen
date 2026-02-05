@@ -1,3 +1,5 @@
+let wayback_prefix = "https://web.archive.org/"
+
 let read_all_from_channel ic =
   let buf = Buffer.create 4096 in
   try
@@ -7,10 +9,26 @@ let read_all_from_channel ic =
     assert false
   with End_of_file -> Buffer.contents buf
 
-let fetch_content_for_url url =
+let sanitize_wayback_html html =
+  (* Replace any web.archive.org prefixed URLs with plain URLs. *)
+  (* NOTE: The replace is a very dumb one, as of now, but should be good enough
+     for most use cases. If we are trying to fetch the HTML for an archived
+     article, for instance, this would break. Or any page containing examples
+     of wayback machine URLs. But, we don't care about it, right now.*)
+  let wayback_url_prefix_regex =
+    Str.regexp {|https://web.archive.org/web/[0-9A-Za-z_-]+\/\(http\)|}
+  in
+  Str.global_replace wayback_url_prefix_regex {|\1|} html
+
+let rec fetch_content_for_url ?(use_wayback = true) url =
   let user_agent =
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) \
      Chrome/89.0.4389.90 Safari/537.36"
+  in
+  let url =
+    if use_wayback && not (String.starts_with ~prefix:wayback_prefix url) then
+      wayback_prefix ^ url
+    else url
   in
   let cmd =
     Printf.sprintf "readable -A '%s' -p html-content '%s' 2>/dev/null"
@@ -21,9 +39,12 @@ let fetch_content_for_url url =
   let status = Unix.close_process_in ic in
   match status with
   | Unix.WEXITED 0 when String.length content > 0 ->
-      Ok content
+      Ok (sanitize_wayback_html content)
   | Unix.WEXITED code ->
-      Error (Printf.sprintf "readable exited with code %d" code)
+      if use_wayback then
+        (* If fetching from Wayback failed, try fetching the original URL directly *)
+        fetch_content_for_url ~use_wayback:false url
+      else Error (Printf.sprintf "readable exited with code %d" code)
   | Unix.WSIGNALED code | Unix.WSTOPPED code ->
       Error (Printf.sprintf "readable killed by signal %d" code)
 
