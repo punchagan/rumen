@@ -46,6 +46,16 @@ button {
 button:hover {
     background: #1d4ed8;
 }
+footer {
+    margin-top: 2rem;
+    font-size: 0.875rem;
+    color: #666;
+    text-align: center;
+}
+footer a {
+    color: inherit;
+    text-decoration: underline;
+}
 .status {
     font-size: 0.875rem;
     color: #666;
