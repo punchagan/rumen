@@ -14,9 +14,20 @@ module Config = struct
 
   let caches = [c_shell; c_entries]
 
-  (* FIXME: Needs icons and screenshots for installable PWA *)
   let shell =
-    ["/"; "/index.html"; "/manifest.json"; "/app.css"; "/app.js"]
+    [ "/"
+    ; "/index.html"
+    ; "/manifest.json"
+    ; "/app.css"
+    ; "/app.js"
+    ; (* Icons *)
+      "/icons/icon-192x192.png"
+    ; "/icons/icon-512x512.png"
+    ; "/icons/icon-maskable-192x192.png"
+    ; "/icons/icon-maskable-512x512.png"
+    ; (* Install screenshots *)
+      "/screenshots/mobile.png"
+    ; "/screenshots/desktop.png" ]
     |> List.map Jstr.v
 end
 
