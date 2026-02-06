@@ -5,6 +5,10 @@ module W = Workflow
 
 type config = {token: string; repo: string}
 
+let committer_name = "Rumen App"
+
+let committer_email = "rumen.app@example.com"
+
 let config_to_jv config =
   Jv.obj
     [|("token", Jv.of_string config.token); ("repo", Jv.of_string config.repo)|]
@@ -46,10 +50,16 @@ let update_path ~headers ~sha ~commit_message ~old url content =
         let resp = Fetch.Response.v () in
         Fut.ok resp )
       else
+        let committer =
+          Jv.obj
+            [| ("name", Jv.of_string committer_name)
+             ; ("email", Jv.of_string committer_email) |]
+        in
         let body =
           Jv.obj
             [| ("message", Jv.of_string commit_message)
-             ; ("content", b64_content |> Jv.of_jstr) |]
+             ; ("content", b64_content |> Jv.of_jstr)
+             ; ("committer", committer) |]
         in
         ( match sha with
         | None ->
