@@ -68,6 +68,16 @@ let clear_param key =
     let new_uri = Uri.with_query_params uri params in
     Window.History.replace_state ?uri:(Some new_uri) (Window.history G.window)
 
+let split_url_from_text text =
+  let url_prefix_regex = Str.regexp "http[s]?://" in
+  match Str.search_backward url_prefix_regex text (String.length text - 1) with
+  | exception Not_found ->
+      (text, "")
+  | pos ->
+      let url = String.sub text pos (String.length text - pos) in
+      let text = String.sub text 0 pos in
+      (text, url)
+
 let show_config () = get_param "config" = "1"
 
 let show_element id =
@@ -185,16 +195,27 @@ let () =
     show_element "entry-form" ; hide_element "setup-form" )
   else (show_element "setup-form" ; hide_element "entry-form") ;
   (* Populate entry-form *)
-  let url = get_param "link" in
+  let url = get_param "url" in
   let title = get_param "title" in
-  let description = get_param "description" in
-  Console.log
-    [ Jstr.v (Printf.sprintf "URL param: %s" url)
-    ; Jstr.v (Printf.sprintf "Title param: %s" title)
-    ; Jstr.v (Printf.sprintf "Text param: %s" description) ] ;
-  set_input_value "url" url ;
+  let description = get_param "text" in
   set_input_value "title" title ;
-  set_input_value "description" description ;
+  (* On Android, the ACTION_SEND intent used to share data from one activity to
+     another only has EXTRA_TITLE and EXTRA_TEXT. So, the `url` parameter can
+     be empty and the URL ends up being in the `text`. *)
+  if String.equal url "" then (
+    if String.starts_with ~prefix:"http" description then (
+      set_input_value "url" description ;
+      set_input_value "description" "" )
+    else
+      (* When a PWA shares with data containing of the type {url; title; text},
+         we seem to receive text parameter with the URL appended to the text
+         content. *)
+      let description, url = split_url_from_text description in
+      set_input_value "description" description ;
+      set_input_value "url" url )
+  else (
+    set_input_value "url" url ;
+    set_input_value "description" description ) ;
   (* Populate setup-form *)
   ( match GH.get_github_config () with
   | None ->
