@@ -202,7 +202,7 @@ let () =
   (* On Android, the ACTION_SEND intent used to share data from one activity to
      another only has EXTRA_TITLE and EXTRA_TEXT. So, the `url` parameter can
      be empty and the URL ends up being in the `text`. *)
-  if String.equal url "" then (
+  if String.equal url "" && not (String.equal description "") then (
     if String.starts_with ~prefix:"http" description then (
       set_input_value "url" description ;
       set_input_value "description" "" )
