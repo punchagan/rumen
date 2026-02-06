@@ -6,6 +6,7 @@
   "display": "standalone",
   "background_color": "#FFF8F0",
   "theme_color": "#FFF8F0",
+  "orientation": "portrait",
   "share_target": {
     "action": "/",
     "method": "GET",
@@ -15,6 +16,20 @@
       "text": "text"
     }
   },
+  "screenshots": [
+    {
+      "src": "/screenshots/mobile.png",
+      "sizes": "390x842",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshots/desktop.png",
+      "sizes": "1200x800",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
   "icons": [
     {
       "src": "/icons/icon-48x48.png",
