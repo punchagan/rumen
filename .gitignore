@@ -5,3 +5,5 @@ _opam/
 
 web/*.js
 /web/scripts/
+
+/web/icons/icon-maskable.svg
