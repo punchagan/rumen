@@ -185,9 +185,16 @@ let () =
     show_element "entry-form" ; hide_element "setup-form" )
   else (show_element "setup-form" ; hide_element "entry-form") ;
   (* Populate entry-form *)
-  set_input_value "url" (get_param "url") ;
-  set_input_value "title" (get_param "title") ;
-  set_input_value "description" (get_param "text") ;
+  let url = get_param "link" in
+  let title = get_param "title" in
+  let description = get_param "description" in
+  Console.log
+    [ Jstr.v (Printf.sprintf "URL param: %s" url)
+    ; Jstr.v (Printf.sprintf "Title param: %s" title)
+    ; Jstr.v (Printf.sprintf "Text param: %s" description) ] ;
+  set_input_value "url" url ;
+  set_input_value "title" title ;
+  set_input_value "description" description ;
   (* Populate setup-form *)
   ( match GH.get_github_config () with
   | None ->
