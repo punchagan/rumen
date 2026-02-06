@@ -4,16 +4,6 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-if [ -z "${GITHUB_ACTIONS:-}" ]; then
-    echo "This script can be set up to run periodically using cron."
-    echo "This is useful, since running the fetch on GitHub Actions fails for"
-    echo "some sites due to their anti-bot measures."
-    echo
-    echo "To run this script as a cron job, add something like this to your crontab :"
-    echo "0 * * * * /path/to/fetch.sh >> /path/to/fetch.log 2>&1"
-    echo "This will run the script every hour and log output to fetch.log."
-fi
-
 # Update the local repository if not running in a GitHub Action
 if [ -z "${GITHUB_ACTIONS:-}" ]; then
     git pull --rebase origin
