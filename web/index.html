@@ -44,6 +44,15 @@
           required
         />
       </div>
+      <div id="bookmarklet-container">
+        <a id="bookmarklet">Rumen Bookmarklet</a>
+        <small>
+          <ul>
+            <li>On a desktop, drag this link to your bookmarks bar.</li>
+            <li>On a mobile device, install it using the PWA install
+                popup on page load.</li>
+        </small>
+      </div>
       <button type="submit">Save Config & Update Repo Workflow</button>
     </form>
     <form id="entry-form" class="hidden">
@@ -71,15 +80,6 @@
       <button type="submit">Save</button>
     </form>
     <p id="status" class="status"></p>
-    <p id="bookmarklet-container">
-        <a id="bookmarklet">Rumen Bookmarklet</a>
-        <small>
-            <ul>
-                <li>On a desktop, drag this link to your bookmarks bar.</li>
-                <li>On a mobile device, install it using the PWA install
-                    popup on page load.</li>
-        </small>
-    </p>
     <script>
      // Register service worker
      if ("serviceWorker" in navigator) {
