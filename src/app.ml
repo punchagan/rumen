@@ -48,7 +48,7 @@ let set_input_value id value =
 let set_status msg class_name =
   let el = get_element "status" in
   El.set_children el [El.txt (Jstr.v msg)] ;
-  El.set_at (Jstr.v "class") (Some (Jstr.v ("status " ^ class_name))) el
+  El.set_at At.Name.class' (Some (Jstr.v ("status " ^ class_name))) el
 
 let get_param key =
   let params = Window.location G.window |> Uri.query_params in
@@ -87,6 +87,19 @@ let show_element id =
 let hide_element id =
   let el = get_element id in
   El.set_class (Jstr.v "hidden") true el
+
+let set_bookmarklet_url = function
+  | Some url ->
+      let bookmarklet_code =
+        Printf.sprintf
+          "javascript:(function(){window.open('%s?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)+'&text='+encodeURIComponent(window.getSelection().toString())+(location.hostname==='localhost'?'&config=1':''))})()"
+          url
+      in
+      let el = get_element "bookmarklet" in
+      El.set_at At.Name.href (Some (Jstr.v bookmarklet_code)) el ;
+      show_element "bookmarklet-container"
+  | None ->
+      hide_element "bookmarklet-container"
 
 let save_entry entry =
   (* TODO: Maybe save to IndexedDB so that service worker can background
@@ -224,6 +237,10 @@ let () =
       set_input_value "github-token" config.token ;
       set_input_value "github-repo" config.repo ) ;
   let submit_ev = Ev.Type.create (Jstr.v "submit") in
+  (* Set bookmarklet url *)
+  let uri = Window.location G.window in
+  let origin = Jv.get (Uri.to_jv uri) "origin" |> Jv.to_string in
+  set_bookmarklet_url (Some origin) ;
   (* Attach entry-form handler *)
   let form = get_element "entry-form" in
   let _ = Ev.listen submit_ev handle_entry_submit (El.as_target form) in
