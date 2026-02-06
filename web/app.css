@@ -18,6 +18,10 @@ form {
 label {
     font-weight: 500;
 }
+h1 a {
+    text-decoration: underline;
+    color: inherit;
+}
 input,
 textarea {
     width: 100%;
