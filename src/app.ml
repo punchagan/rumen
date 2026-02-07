@@ -50,6 +50,12 @@ let set_status msg class_name =
   El.set_children el [El.txt (Jstr.v msg)] ;
   El.set_at At.Name.class' (Some (Jstr.v ("status " ^ class_name))) el
 
+let set_status_with_link ~url msg class_name =
+  let el = get_element "status" in
+  let link = El.a ~at:[At.href (Jstr.v url)] [El.txt (Jstr.v msg)] in
+  El.set_children el [link] ;
+  El.set_at At.Name.class' (Some (Jstr.v ("status " ^ class_name))) el
+
 let get_param key =
   let params = Window.location G.window |> Uri.query_params in
   Uri.Params.find (Jstr.v key) params
@@ -124,7 +130,18 @@ let save_entry entry =
         | Ok response ->
             if Fetch.Response.ok response then (
               LocalStorage.remove_entry entry |> ignore ;
-              set_status "Saved entry to GitHub!" "success" )
+              let open Fut.Result_syntax in
+              let _ =
+                let* data =
+                  Fetch.Response.as_body response |> Fetch.Body.json
+                in
+                let url =
+                  Jv.get (Jv.get data "content") "html_url" |> Jv.to_string
+                in
+                set_status_with_link ~url "Saved entry to GitHub!" "success" ;
+                Fut.ok ()
+              in
+              () )
             else
               set_status
                 (Printf.sprintf "GitHub API error: %d"
