@@ -1,0 +1,146 @@
+#+TITLE: Rumen
+
+A lightweight *read-later* app that saves links into a GitHub repository you
+own and creates a *full-content Atom feed* you can read in your feed reader.
+
+Rumen is an offline-capable Progressive Web App (PWA). Saving a link creates a
+small JSON file in your repository; a GitHub Actions workflow fetches article
+content and publishes an Atom feed via GitHub Pages.
+
+Your data stays simple, portable, and under your control.
+
+--------------
+
+** Features
+- Save links to read later (mobile or desktop)
+- Full-content Atom feed (not just summaries)
+- Tags and personal notes per article
+- Offline capture with automatic sync
+- Bookmarks stored as plain JSON files in your own repository
+- Articles fetched via the Internet Archive (for reliability and
+  preservation)
+
+** How It Works
+1. You save a bookmark (via the PWA on mobile, or a bookmarklet on
+   desktop).
+2. Rumen commits a JSON file to your GitHub repository containing the
+   URL, title, tags, and notes.
+3. A GitHub Actions workflow archives the article, fetches readable
+   content, and generates a full-content Atom feed.
+4. The feed is deployed to GitHub Pages.
+5. You subscribe to the feed in your favorite reader and read articles
+   later.
+
+Behind the scenes, content is fetched via the Internet Archive. This
+makes fetching reliable in GitHub Actions and ensures articles remain
+accessible even if the original site changes or disappears.
+
+** Setup
+*** 1. Create a data repository
+Create a new GitHub repository (for example: =your-username/rumen-data=). This
+repository will store your bookmarks and the generated feed.
+
+#+begin_quote
+*Note:* GitHub Pages availability for private repositories depends on your
+GitHub plan. If Pages is not available for private repos on your plan, the
+repository must be public.
+#+end_quote
+
+*** 2. Create a GitHub Personal Access Token
+Create a *fine-grained* personal access token with write access *only* to your
+data repository.
+
+On the [[https://github.com/settings/personal-access-tokens/new?name=Rumen%20data&actions=write&contents=write&workflows=write&description=Used%20by%20Rumen%20to%20save%20bookmarks%20and%20manage%20data%20repository][token creation page]]:
+
+1. Under *Repository access*, select *Only select repositories*.
+2. Select your data repository.
+3. Enable:
+   - *Contents: Read and write*
+   - *Workflows: Read and write*
+   - *Actions: Read and write*
+4. Generate the token and copy it.
+
+#+begin_quote
+Rumen stores this token locally in your browser and uses it only to commit
+files and update the workflow in your repository.
+#+end_quote
+
+*** 3. Configure the App
+1. Open the Rumen app in your browser.
+2. Install it as a PWA when prompted (recommended, especially on mobile).
+3. Paste your GitHub token and enter your repository name
+   (e.g. =your-username/rumen-data=).
+4. Click *Save Config & Update Repo Workflow*.
+
+This saves your configuration locally and pushes the GitHub Actions
+workflow file to your repository.
+
+*** 4. Enable GitHub Pages
+In your data repository settings:
+
+1. Go to *Pages*.
+2. Set the source to *GitHub Actions*.
+
+Once enabled, your Atom feed will be available at your GitHub Pages URL (after
+the first GitHub Actions run).
+
+
+** Usage
+*** On Mobile (Android)
+When installed as a PWA, Rumen appears as a share target in Android's
+native share menu.
+
+From any app (browser, news reader, etc.):
+
+1. Tap *Share*
+2. Select *Rumen*
+3. Add tags or notes if you like
+4. Tap *Save*
+
+#+begin_quote
+*Note:* On Android, shared URLs often arrive in the =text= field rather than
+=url= due to how intents work. Rumen handles this automatically, but please
+report any issues you encounter.
+#+end_quote
+
+*** On Mobile (iOS)
+iOS doesn't support the Web Share Target API. So, you can install the PWA but
+it won't appear as in the share menu on iOS. You will need to manually copy
+URLs, titles, etc., to use Rumen. You could add a shortcut on the home screen
+to make life a little easier.
+
+*** On Desktop
+Drag the *Rumen Bookmarklet* link from the [[https://rumen.muse-amuse.in/?config=1][config page]] to your bookmarks bar.
+
+On any page that you wish to save, click the bookmarklet to open Rumen with the
+page's URL, title, and any selected text pre-filled.
+
+*** Offline Support
+Pages saved while offline are stored locally in your browser and automatically
+synced to GitHub the next time you open the app with an internet connection.
+
+*** Subscribe
+Once your feed is generated, subscribe to it in your existing feed reader. The
+feed should be available on GitHub pages at the url
+=https://<username>.github.io/<repository-name>/atom.xml=. Read and Enjoy!
+
+** Development
+The web app is written in OCaml and built with a recent version of
+[[https://nightly.dune.build/][dune]] that supports package management.
+
+To build the web assets and the CLI, run:
+
+#+begin_src sh
+dune build @web
+#+end_src
+
+You can find the built assets in the =web/= directory.
+
+Run the following command to see help for the CLI:
+
+#+begin_src sh
+dune exec -- scripts/rumen_cli.exe --help
+#+end_src
+
+** License
+AGPLv3. See [[file:LICENSE]] for details.
