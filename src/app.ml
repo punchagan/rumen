@@ -274,7 +274,7 @@ let handle_entry_submit ev =
 
 let set_pending_sync_status ~total = function
   | 0 ->
-      set_status (Printf.sprintf "%d entries pending sync ..." total) "error"
+      set_status (Printf.sprintf "%d entries pending sync ..." total) "info"
   | count when count < total ->
       set_status
         (Printf.sprintf "%d entries synced; %d pending sync ..." count total)

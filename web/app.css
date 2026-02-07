@@ -66,6 +66,9 @@ footer a {
 .status.success {
     color: #16a34a;
 }
+.status.info {
+    color: #2563eb;
+}
 .hidden {
     display: none;
 }
