@@ -169,6 +169,35 @@ let entry_of_form () =
   ; content= None
   ; added }
 
+let entry_to_form entry =
+  set_input_value "url" entry.Entry.url ;
+  set_input_value "title" entry.title ;
+  set_input_value "description" entry.description ;
+  set_input_value "tags" (String.concat ", " entry.tags)
+
+let entry_of_params () =
+  let url = get_param "url" in
+  let title = get_param "title" in
+  let description = get_param "text" in
+  (* On Android, the ACTION_SEND intent used to share data from one activity to
+     another only has EXTRA_TITLE and EXTRA_TEXT. So, the `url` parameter can
+     be empty and the URL ends up being in the `text`. *)
+  let description, url =
+    match (description, url) with
+    | "", "" ->
+        ("", "")
+    | description, "" ->
+        if String.starts_with ~prefix:"http" description then (description, "")
+        else
+          (* When a PWA shares with data containing of the type {url; title; text},
+           we seem to receive text parameter with the URL appended to the text
+           content. *)
+          split_url_from_text description
+    | description, url ->
+        (description, url)
+  in
+  {Entry.url; title; tags= []; description; content= None; added= 0.}
+
 let clear_form () =
   List.iter
     (fun id -> set_input_value id "")
@@ -228,27 +257,7 @@ let () =
     show_element "entry-form" ; hide_element "setup-form" )
   else (show_element "setup-form" ; hide_element "entry-form") ;
   (* Populate entry-form *)
-  let url = get_param "url" in
-  let title = get_param "title" in
-  let description = get_param "text" in
-  set_input_value "title" title ;
-  (* On Android, the ACTION_SEND intent used to share data from one activity to
-     another only has EXTRA_TITLE and EXTRA_TEXT. So, the `url` parameter can
-     be empty and the URL ends up being in the `text`. *)
-  if String.equal url "" && not (String.equal description "") then (
-    if String.starts_with ~prefix:"http" description then (
-      set_input_value "url" description ;
-      set_input_value "description" "" )
-    else
-      (* When a PWA shares with data containing of the type {url; title; text},
-         we seem to receive text parameter with the URL appended to the text
-         content. *)
-      let description, url = split_url_from_text description in
-      set_input_value "description" description ;
-      set_input_value "url" url )
-  else (
-    set_input_value "url" url ;
-    set_input_value "description" description ) ;
+  entry_of_params () |> entry_to_form ;
   (* Populate setup-form *)
   ( match GH.get_github_config () with
   | None ->
