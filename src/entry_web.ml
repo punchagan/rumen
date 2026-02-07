@@ -10,6 +10,16 @@ let to_jv (entry : Entry.t) =
   Jv.set o "added" (Jv.of_float entry.added) ;
   o
 
+let of_jv (jv : Jv.t) =
+  let url = Jv.get jv "url" |> Jv.to_string in
+  let title = Jv.get jv "title" |> Jv.to_string in
+  let tags =
+    Jv.get jv "tags" |> Jv.to_jv_list |> List.map (fun t -> Jv.to_string t)
+  in
+  let description = Jv.get jv "description" |> Jv.to_string in
+  let added = Jv.get jv "added" |> Jv.to_float in
+  {Entry.url; title; tags; description; content= None; added}
+
 let filename (entry : Entry.t) =
   let format_date (ms : float) =
     let ms = Jv.of_float ms in

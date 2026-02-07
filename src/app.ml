@@ -28,6 +28,19 @@ module LocalStorage = struct
   let remove_entry (entry : Entry.t) =
     let key = Jstr.v ("entry:" ^ entry.url) in
     Storage.remove_item storage key
+
+  let list_entries () =
+    Storage.length storage
+    |> fun len ->
+    List.init len (fun i -> Storage.key storage i)
+    |> List.filter_map (function
+      | Some key when Jstr.starts_with ~prefix:(Jstr.v "entry:") key ->
+          Storage.get_item storage key
+          |> Option.map (fun value ->
+              Json.decode value |> Result.to_option |> Option.map Entry_w.of_jv )
+          |> Option.join
+      | _ ->
+          None )
 end
 
 let get_element id =
@@ -259,6 +272,31 @@ let handle_entry_submit ev =
     clear_form () )
   else set_status "Failed to save entry." "error"
 
+let set_pending_sync_status ~total = function
+  | 0 ->
+      set_status (Printf.sprintf "%d entries pending sync ..." total) "error"
+  | count when count < total ->
+      set_status
+        (Printf.sprintf "%d entries synced; %d pending sync ..." count total)
+        "success"
+  | count when count = total ->
+      set_status "All entries are synced!" "success"
+  | _ ->
+      ()
+
+let handle_on_load _ev =
+  let entries = LocalStorage.list_entries () in
+  let config = GH.get_github_config () in
+  match (config, entries) with
+  | None, _ ->
+      Console.log [Jv.of_string "No GitHub configuration found. Skipping sync."]
+  | Some _, [] ->
+      Console.log [Jv.of_string "No pending entries to sync."]
+  | Some _, entries ->
+      GH.save_entries
+        ~on_done:(set_pending_sync_status ~total:(List.length entries))
+        ~on_success:LocalStorage.remove_entry entries
+
 let () =
   if LocalStorage.has_config () && not (show_config ()) then (
     show_element "entry-form" ; hide_element "setup-form" )
@@ -281,4 +319,6 @@ let () =
     Ev.listen submit_ev handle_save_config_and_update_workflow
       (El.as_target setup_form)
   in
+  (* Attach on_load handler *)
+  let _ = Ev.listen Ev.load handle_on_load (Window.as_target G.window) in
   Console.log [Jstr.v "rumen app initialized"]

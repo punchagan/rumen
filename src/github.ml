@@ -2,6 +2,7 @@ open Brr
 module Fetch = Brr_io.Fetch
 module Storage = Brr_io.Storage
 module W = Workflow
+module Entry = Rumen.Entry
 
 type config = {token: string; repo: string}
 
@@ -123,6 +124,41 @@ let save_entry_to_github entry =
       let path = Entry_web.filename entry in
       let commit_message = entry.title in
       create_or_update_file ~commit_message ~config ~path content
+
+let save_entries ~on_success ~on_done entries =
+  let queue = entries |> List.to_seq |> Queue.of_seq in
+  let ok = ref 0 in
+  let rec process_next () =
+    match Queue.take_opt queue with
+    | None ->
+        on_done !ok |> ignore ;
+        Console.log [Jv.of_string "All entries have been processed."]
+    | Some entry ->
+        Console.log
+          [Jv.of_string (Printf.sprintf "Syncing entry: %s" entry.Entry.url)] ;
+        Fut.await (save_entry_to_github entry) (fun res ->
+            ( match res with
+            | Ok response when Fetch.Response.ok response ->
+                on_success entry |> ignore ;
+                ok := !ok + 1 ;
+                Console.log
+                  [ Jv.of_string
+                      (Printf.sprintf "Successfully synced: %s" entry.Entry.url)
+                  ]
+            | Ok response ->
+                Console.log
+                  [ Jv.of_string
+                      (Printf.sprintf "GitHub API error for %s: %d"
+                         entry.Entry.url
+                         (Fetch.Response.status response) ) ]
+            | Error e ->
+                Console.log
+                  [ Jv.of_string
+                      (Printf.sprintf "Failed to sync %s: %s" entry.Entry.url
+                         (e |> Jv.Error.message |> Jstr.to_string) ) ] ) ;
+            process_next () )
+  in
+  process_next ()
 
 let update_workflow_file () =
   match get_github_config () with
