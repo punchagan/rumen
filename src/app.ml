@@ -198,6 +198,15 @@ let entry_of_params () =
   in
   {Entry.url; title; tags= []; description; content= None; added= 0.}
 
+let config_of_form () =
+  let token = get_input_value "github-token" in
+  let repo = get_input_value "github-repo" in
+  {GH.token; repo}
+
+let config_to_form config =
+  set_input_value "github-token" config.GH.token ;
+  set_input_value "github-repo" config.repo
+
 let clear_form () =
   List.iter
     (fun id -> set_input_value id "")
@@ -206,9 +215,7 @@ let clear_form () =
 let handle_config_submit ev =
   Ev.prevent_default ev ;
   Ev.stop_propagation ev ;
-  let token = get_input_value "github-token" in
-  let repo = get_input_value "github-repo" in
-  let config = {GH.token; repo} in
+  let config = config_of_form () in
   match LocalStorage.save_config config with
   | Ok () ->
       set_status "Configuration saved!" "success" ;
@@ -259,12 +266,7 @@ let () =
   (* Populate entry-form *)
   entry_of_params () |> entry_to_form ;
   (* Populate setup-form *)
-  ( match GH.get_github_config () with
-  | None ->
-      ()
-  | Some config ->
-      set_input_value "github-token" config.token ;
-      set_input_value "github-repo" config.repo ) ;
+  GH.get_github_config () |> Option.map config_to_form |> ignore ;
   let submit_ev = Ev.Type.create (Jstr.v "submit") in
   (* Set bookmarklet url *)
   let uri = Window.location G.window in
