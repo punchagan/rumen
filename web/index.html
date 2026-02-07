@@ -22,16 +22,11 @@
         <label for="github-token">GitHub Token</label>
         <input type="password" id="github-token" name="github-token" required />
         <small
-          >Needs the following scopes on your data repository:
-            <ul>
-                <li><code>contents: read&write</code></li>
-                <li><code>workflows: read&write</code></li>
-                <li><code>actions: read&write</code></li>
-            </ul>
+          >Needs permissions to write contents, actions and workflows.
             <a
-                href="https://github.com/settings/personal-access-tokens/new?name=Rumen%20data"
+                href="https://github.com/settings/personal-access-tokens/new?name=Rumen%20data&actions=write&contents=write&workflows=write&description=Used%20by%20Rumen%20to%20save%20bookmarks%20and%20manage%20data%20repository"
                 target="_blank"
-            >Create token</a> with access to only your data repository</small>
+            >Create token</a> with access <strong>only to your data repository.</strong> Please select <strong>Only one repository</strong> in <code>Repository Access</code> and select your repository from the dropdown.</small>
 
       </div>
       <div>
