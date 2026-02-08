@@ -107,6 +107,20 @@ let hide_element id =
   let el = get_element id in
   El.set_class (Jstr.v "hidden") true el
 
+let show_entry_view () =
+  show_element "entry-form" ;
+  hide_element "setup-form" ;
+  if LocalStorage.has_config () then show_element "config-btn"
+  else hide_element "config-btn" ;
+  hide_element "config-close-btn"
+
+let show_config_view () =
+  show_element "setup-form" ;
+  hide_element "entry-form" ;
+  hide_element "config-btn" ;
+  if LocalStorage.has_config () then show_element "config-close-btn"
+  else hide_element "config-close-btn"
+
 let set_bookmarklet_url url =
   match Uri.of_jstr url with
   | Error _ ->
@@ -232,8 +246,7 @@ let handle_config_submit ev =
   match LocalStorage.save_config config with
   | Ok () ->
       set_status "Configuration saved!" "success" ;
-      show_element "entry-form" ;
-      hide_element "setup-form"
+      show_entry_view ()
   | Error e ->
       set_status
         (Printf.sprintf "Failed to save configuration: %s"
@@ -298,9 +311,8 @@ let handle_on_load _ev =
         ~on_success:LocalStorage.remove_entry entries
 
 let () =
-  if LocalStorage.has_config () && not (show_config ()) then (
-    show_element "entry-form" ; hide_element "setup-form" )
-  else (show_element "setup-form" ; hide_element "entry-form") ;
+  if LocalStorage.has_config () && not (show_config ()) then show_entry_view ()
+  else show_config_view () ;
   (* Populate entry-form *)
   entry_of_params () |> entry_to_form ;
   (* Populate setup-form *)
@@ -318,6 +330,19 @@ let () =
   let _ =
     Ev.listen submit_ev handle_save_config_and_update_workflow
       (El.as_target setup_form)
+  in
+  (* Attach config toggle handlers *)
+  let config_btn = get_element "config-btn" in
+  let _ =
+    Ev.listen Ev.click
+      (fun _ev -> show_config_view ())
+      (El.as_target config_btn)
+  in
+  let config_close_btn = get_element "config-close-btn" in
+  let _ =
+    Ev.listen Ev.click
+      (fun _ev -> show_entry_view ())
+      (El.as_target config_close_btn)
   in
   (* Attach on_load handler *)
   let _ = Ev.listen Ev.load handle_on_load (Window.as_target G.window) in
