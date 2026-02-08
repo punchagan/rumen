@@ -107,17 +107,34 @@ let hide_element id =
   let el = get_element id in
   El.set_class (Jstr.v "hidden") true el
 
+let set_feed_url () =
+  match GH.get_github_config () with
+  | None ->
+      ()
+  | Some config -> (
+    match String.split_on_char '/' config.repo with
+    | [username; repo_name] ->
+        let url =
+          Printf.sprintf "https://%s.github.io/%s/atom.xml" username repo_name
+        in
+        let el = get_element "feed-link" in
+        El.set_at At.Name.href (Some (Jstr.v url)) el
+    | _ ->
+        () )
+
 let show_entry_view () =
   show_element "entry-form" ;
   hide_element "setup-form" ;
-  if LocalStorage.has_config () then show_element "config-btn"
-  else hide_element "config-btn" ;
+  if LocalStorage.has_config () then (
+    show_element "config-btn" ; set_feed_url () ; show_element "feed-link" )
+  else (hide_element "config-btn" ; hide_element "feed-link") ;
   hide_element "config-close-btn"
 
 let show_config_view () =
   show_element "setup-form" ;
   hide_element "entry-form" ;
   hide_element "config-btn" ;
+  hide_element "feed-link" ;
   if LocalStorage.has_config () then show_element "config-close-btn"
   else hide_element "config-close-btn"
 
