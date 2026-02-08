@@ -70,7 +70,7 @@ files and update the workflow in your repository.
 2. Install it as a PWA when prompted (recommended, especially on mobile).
 3. Paste your GitHub token and enter your repository name
    (e.g. =your-username/rumen-data=).
-4. Click *Save Config & Update Repo Workflow*.
+4. Click *Save Config & Repo Workflow*.
 
 This saves your configuration locally and pushes the GitHub Actions
 workflow file to your repository.
